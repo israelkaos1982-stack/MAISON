@@ -30,7 +30,7 @@
   .firmindex{width:100%;display:flex;flex-wrap:wrap;gap:6px;padding:4px 0 2px}
   .firmindex button{background:var(--ink);border:1px solid var(--line);color:var(--gold-soft);font-family:'Cormorant Garamond',serif;font-size:15px;padding:6px 12px;border-radius:2px;cursor:pointer;transition:.2s}
   .firmindex button:hover,.firmindex button.sel{border-color:var(--gold);background:rgba(201,162,75,.1)}
-  .firmletter{width:100%;font-family:'Cormorant Garamond',serif;font-size:23px;font-weight:600;color:var(--noir);background:linear-gradient(90deg,var(--gold),var(--gold-soft));padding:6px 16px;border-radius:3px;margin:18px 0 8px;letter-spacing:.05em}
+  .firmletter{width:auto;display:inline-block;font-family:'Cormorant Garamond',serif;font-size:14px;font-weight:600;color:var(--noir);background:linear-gradient(90deg,var(--gold),var(--gold-soft));padding:2px 10px;border-radius:3px;margin:16px 0 6px;letter-spacing:.05em}
   .firmletter:first-child{margin-top:0}
   .totop{position:fixed;right:16px;bottom:90px;z-index:41;width:46px;height:46px;border-radius:50%;background:var(--ink);border:1px solid var(--gold);color:var(--gold-soft);font-size:20px;line-height:1;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 2px 12px rgba(0,0,0,.5);opacity:0;pointer-events:none;transform:translateY(8px);transition:.25s}
   .totop.show{opacity:1;pointer-events:auto;transform:translateY(0)}
@@ -3797,6 +3797,11 @@ function load(){
   newHomePerfumes().forEach(np=>{
     if(!have.includes((np.brand+'|'+np.name).toLowerCase())){perfumes.push({id:uid(),photo:null,home:true,...np});added=true;}
   });
+  // MIGRACIÓN: precio por defecto 45€ para los de 🏠 casa que aún no tengan precio (una sola vez)
+  if(localStorage.getItem('israngel_casa_price_v1')!=='1'){
+    perfumes.forEach(p=>{if(p.avail==='casa'&&!(p.price>0)){p.price=45;added=true;}});
+    localStorage.setItem('israngel_casa_price_v1','1');
+  }
   if(added)save();
 }
 function save(){try{localStorage.setItem(STORE,JSON.stringify({perfumes}));}catch(e){toast('No se pudo guardar (memoria llena)');}}
@@ -3830,7 +3835,7 @@ function render(){
       const home=badges?`<div class="home">${badges}</div>`:'';
       const g=GICON[p.gender]?`<span class="gtag">${GICON[p.gender]}</span>`:'';
       const st=(p.stock<=0)?`<span class="stocktag stockzero">×0</span>`:`<span class="stocktag">×${p.stock}</span>`;
-      const cond=(p.cond&&p.cond!=='regular')?`<span class="condtag">${CLABEL[p.cond]}</span>`:'';
+      const condPrice=`<span class="condtag">${CLABEL[p.cond||'regular']}</span>`;
       const priceTxt=(p.price>0)?fmt(p.price):'<em style="font-size:12px;color:var(--muted)">Sin precio</em>';
       let aCost=p.cost, aGain=(p.price>0&&p.cost>0)?(p.price-p.cost):null;
       if(p.avail==='envio'&&p.price>0){aCost=p.price-14;aGain=14;}
@@ -3841,9 +3846,9 @@ function render(){
         <div class="rphoto" data-edit="${p.id}">${home}${ph}</div>
         <div class="rbody">
           <div class="rname">${p.name||'Sin nombre'}</div>
-          <div class="rmeta">${p.size?`<span>${p.size}</span>`:''}${g}${st}${cond}</div>
+          <div class="rmeta">${p.size?`<span>${p.size}</span>`:''}${g}${st}</div>
           <div class="rbottom">
-            <div class="price">${priceTxt}</div>
+            <div class="price">${priceTxt} ${condPrice}</div>
             ${adminMode?'':adminBtns}
           </div>
           ${adminMode?adminInfo+adminBtns:''}
@@ -4144,7 +4149,8 @@ document.getElementById('salesList').onclick=e=>{
     const acc=s.accountName||(accounts.find(a=>a.id===s.accountId)||{}).name||'—';
     let t='🧾 *Venta MAISON*%0A%0A';
     t+='✨ '+s.brand+' '+s.name+(s.size?' · '+s.size:'')+'%0A';
-    t+='💰 '+fmt(s.price)+'%0A';
+    t+='💰 Venta '+fmt(s.price)+'%0A';
+    t+='💸 Costo '+fmt(s.cost||0)+'%0A';
     t+='🏷️ '+acc+'%0A';
     if(s.buyer)t+='👤 '+s.buyer+'%0A';
     t+='📅 '+d;
@@ -4163,16 +4169,18 @@ document.getElementById('clearSales').onclick=()=>{
 document.getElementById('shareSales').onclick=()=>{
   if(!sales.length){toast('No hay ventas que compartir');return;}
   const totalVenta=sales.reduce((a,s)=>a+s.price,0);
+  const totalCosto=sales.reduce((a,s)=>a+(s.cost||0),0);
   const totalBenef=sales.reduce((a,s)=>a+s.benefit,0);
   let t='🧾 *VENTAS MAISON*%0A%0A';
   sales.forEach(s=>{
     const acc=s.accountName||(accounts.find(a=>a.id===s.accountId)||{}).name||'—';
-    t+='✨ '+s.brand+' '+s.name+' » '+fmt(s.price);
+    t+='✨ '+s.brand+' '+s.name+' » Venta '+fmt(s.price)+' · Costo '+fmt(s.cost||0);
     t+=' ('+acc+(s.buyer?' · '+s.buyer:'')+')%0A';
   });
   t+='%0A━━━━━━━━%0A';
   t+='📦 '+sales.length+' ventas%0A';
   t+='💰 Facturado: '+fmt(totalVenta)+'%0A';
+  t+='💸 Costo total: '+fmt(totalCosto)+'%0A';
   t+='📈 Beneficio: '+fmt(totalBenef);
   window.open('https://wa.me/?text='+t,'_blank');
 };
