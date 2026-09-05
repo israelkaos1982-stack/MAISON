@@ -1,6 +1,9 @@
 # Maison
 
-Aplicación Flask que sirve una página única (`templates/index.html`).
+Catálogo de perfumes (venta directa + gestión de ventas por Vinted).
+Aplicación Flask que sirve una única página autocontenida
+(`templates/index.html` — HTML/CSS/JS, todos los datos se guardan en
+el `localStorage` del navegador del dispositivo).
 
 ## Desarrollo local
 
