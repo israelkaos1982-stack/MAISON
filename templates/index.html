@@ -30,6 +30,11 @@
   .firmindex{width:100%;display:flex;flex-wrap:wrap;gap:6px;padding:4px 0 2px}
   .firmindex button{background:var(--ink);border:1px solid var(--line);color:var(--gold-soft);font-family:'Cormorant Garamond',serif;font-size:15px;padding:6px 12px;border-radius:2px;cursor:pointer;transition:.2s}
   .firmindex button:hover,.firmindex button.sel{border-color:var(--gold);background:rgba(201,162,75,.1)}
+  .firmletter{width:100%;font-family:'Cormorant Garamond',serif;font-size:23px;font-weight:600;color:var(--noir);background:linear-gradient(90deg,var(--gold),var(--gold-soft));padding:6px 16px;border-radius:3px;margin:18px 0 8px;letter-spacing:.05em}
+  .firmletter:first-child{margin-top:0}
+  .totop{position:fixed;right:16px;bottom:90px;z-index:41;width:46px;height:46px;border-radius:50%;background:var(--ink);border:1px solid var(--gold);color:var(--gold-soft);font-size:20px;line-height:1;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 2px 12px rgba(0,0,0,.5);opacity:0;pointer-events:none;transform:translateY(8px);transition:.25s}
+  .totop.show{opacity:1;pointer-events:auto;transform:translateY(0)}
+  .totop:hover{border-color:var(--gold-soft);background:rgba(201,162,75,.12)}
   .adminbar{display:none;gap:6px;width:100%;flex-wrap:nowrap;overflow-x:auto;margin-top:4px;padding-top:10px;border-top:1px dashed var(--line);-webkit-overflow-scrolling:touch}
   .adminbar.on{display:flex}
   .adminbar .btn{flex:1 0 auto;padding:10px 11px;font-size:11px;letter-spacing:.08em;white-space:nowrap}
@@ -207,6 +212,8 @@
 </div>
 
 <div class="wrap" id="wrap"></div>
+
+<button class="totop" id="toTopBtn" aria-label="Subir arriba" title="Subir arriba">↑</button>
 
 <div class="cartbar">
   <div class="carttotal">🛒 <b id="cartCount" style="color:#fff">0</b> · <b id="cartTotal">0,00€</b></div>
@@ -3800,7 +3807,10 @@ function render(){
   const wrap=document.getElementById('wrap');
   if(activeFilter==='firmas'&&!selectedFirm){
     const brands=[...new Set(perfumes.map(p=>p.brand))].sort((a,b)=>a.localeCompare(b,'es'));
-    wrap.innerHTML='<div class="firmindex">'+brands.map(b=>`<button data-firm="${b.replace(/"/g,'&quot;')}">${b}</button>`).join('')+'</div>';
+    const byLetter={};
+    brands.forEach(b=>{const l=(b[0]||'#').toUpperCase();(byLetter[l]=byLetter[l]||[]).push(b);});
+    const letters=Object.keys(byLetter).sort((a,b)=>a.localeCompare(b,'es'));
+    wrap.innerHTML=letters.map(l=>`<div class="firmletter">${l}</div><div class="firmindex">`+byLetter[l].map(b=>`<button data-firm="${b.replace(/"/g,'&quot;')}">${b}</button>`).join('')+'</div>').join('');
     return;
   }
   let list=perfumes.filter(p=>(p.brand+' '+p.name).toLowerCase().includes(q));
@@ -4556,6 +4566,10 @@ document.getElementById('delPinOverlay').onclick=e=>{if(e.target===document.getE
 
 loadSales();loadAccounts();loadTransfers();
 load();render();renderCart();
+
+const toTopBtn=document.getElementById('toTopBtn');
+window.addEventListener('scroll',()=>{toTopBtn.classList.toggle('show',window.scrollY>320);},{passive:true});
+toTopBtn.onclick=()=>window.scrollTo({top:0,behavior:'smooth'});
 </script>
 </body>
 </html>
