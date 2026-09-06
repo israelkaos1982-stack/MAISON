@@ -22,9 +22,16 @@
   .search{flex:1;min-width:150px;background:var(--ink);border:1px solid var(--line);color:var(--cream);padding:11px 14px;border-radius:2px;font-family:'Jost';font-size:14px;font-weight:300}
   .search::placeholder{color:var(--muted)}
   .search:focus{outline:none;border-color:var(--gold)}
-  .filters{display:flex;gap:3px;width:100%}
-  .fbtn{flex:1;background:var(--ink);border:1px solid var(--line);color:var(--muted);font-family:'Jost';font-size:9px;font-weight:500;letter-spacing:0;padding:8px 1px;border-radius:2px;cursor:pointer;transition:.2s;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .fbtn.sel{border-color:var(--gold);color:var(--gold-soft);background:rgba(201,162,75,.1)}
+  .filters{display:flex;gap:4px;width:100%}
+  .fbtn{flex:1;background:rgba(255,255,255,.03);border:1.5px solid var(--line);color:var(--muted);font-family:'Jost';font-size:12px;font-weight:700;letter-spacing:.01em;padding:11px 2px;border-radius:3px;cursor:pointer;transition:.2s;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-transform:uppercase}
+  .fbtn[data-f="firmas"]{border-color:rgba(180,140,224,.5);color:#c9a8ec}
+  .fbtn[data-f="all"]{border-color:rgba(201,162,75,.5);color:var(--gold-soft)}
+  .fbtn[data-f="casa"]{border-color:rgba(224,138,74,.5);color:#eaa877}
+  .fbtn[data-f="envio"]{border-color:rgba(90,169,230,.5);color:#7cc0f0}
+  .fbtn.sel[data-f="firmas"]{background:rgba(180,140,224,.2);border-color:#b48ce0;color:#e2cbf7}
+  .fbtn.sel[data-f="all"]{background:rgba(201,162,75,.2);border-color:var(--gold);color:var(--gold-soft)}
+  .fbtn.sel[data-f="casa"]{background:rgba(224,138,74,.2);border-color:#e08a4a;color:#f6c9a0}
+  .fbtn.sel[data-f="envio"]{background:rgba(90,169,230,.2);border-color:#5aa9e6;color:#b6e0fb}
   .delivery{width:100%;text-align:center;font-family:'Cormorant Garamond',serif;font-size:19px;font-weight:600;letter-spacing:.04em;color:var(--gold-soft);min-height:0;transition:.2s}
   .delivery:not(:empty){padding:12px 0 4px}
   .firmindex{width:100%;display:flex;flex-wrap:wrap;gap:6px;padding:4px 0 2px}
@@ -190,10 +197,10 @@
 <div class="bar">
   <input id="search" class="search" type="search" placeholder="Buscar perfume o marca…" aria-label="Buscar">
   <div class="filters" id="filters">
+    <button class="fbtn" data-f="firmas">FIRMAS</button>
     <button class="fbtn sel" data-f="all">TODOS</button>
     <button class="fbtn" data-f="casa">🏠 CASA</button>
     <button class="fbtn" data-f="envio">✈️ ENCARGO</button>
-    <button class="fbtn" data-f="firmas">🧫 FIRMAS</button>
   </div>
   <div class="delivery" id="delivery"></div>
   <div class="adminbar" id="adminBar">
@@ -3996,7 +4003,18 @@ document.getElementById('wrap').onclick=e=>{const add=e.target.closest('[data-ad
 document.getElementById('cartBtn').onclick=()=>{renderCart();cartOverlay.classList.add('on');};
 document.getElementById('closeCart').onclick=()=>cartOverlay.classList.remove('on');
 document.getElementById('cartItems').onclick=e=>{const inc=e.target.closest('[data-inc]'),dec=e.target.closest('[data-dec]');if(inc){cart[inc.dataset.inc]++;}if(dec){const id=dec.dataset.dec;cart[id]--;if(cart[id]<=0)delete cart[id];}render();renderCart();};
-document.getElementById('checkoutBtn').onclick=()=>{const ids=Object.keys(cart);if(!ids.length){toast('Tu cesta está vacía');return;}let txt='Hola! Quiero pedir de MAISON:%0A',total=0;ids.forEach(id=>{const p=perfumes.find(x=>x.id===id);if(p){txt+=`• ${p.brand} ${p.name} (${p.size}) x${cart[id]} — ${fmt(p.price*cart[id])}%0A`;total+=p.price*cart[id];}});txt+=`%0ATotal: ${fmt(total)}`;window.open('https://wa.me/?text='+txt,'_blank');};
+document.getElementById('checkoutBtn').onclick=()=>{
+  const ids=Object.keys(cart);if(!ids.length){toast('Tu cesta está vacía');return;}
+  let txt='Hola! Quiero pedir de MAISON:%0A%0A',total=0;
+  ids.forEach(id=>{
+    const p=perfumes.find(x=>x.id===id);if(!p)return;
+    const est=CLABEL[p.cond||'regular'];
+    txt+=`• ${p.brand} ${p.name} (${p.size} · ${est}) x${cart[id]} — ${fmt(p.price*cart[id])}%0A%0A`;
+    total+=p.price*cart[id];
+  });
+  txt+=`Total: ${fmt(total)}`;
+  window.open('https://wa.me/?text='+txt,'_blank');
+};
 
 document.getElementById('exportBtn').onclick=()=>{const blob=new Blob([JSON.stringify({perfumes},null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='israngel-datos.json';a.click();toast('Datos exportados');};
 document.getElementById('importBtn').onclick=()=>document.getElementById('importFile').click();
