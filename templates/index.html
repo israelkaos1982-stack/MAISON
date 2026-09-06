@@ -209,8 +209,8 @@
 <div class="bar">
   <input id="search" class="search" type="search" placeholder="Buscar perfume o marca…" aria-label="Buscar">
   <div class="filters" id="filters">
-    <button class="fbtn" data-f="firmas">FIRMAS</button>
-    <button class="fbtn sel" data-f="all">TODOS</button>
+    <button class="fbtn sel" data-f="firmas">FIRMAS</button>
+    <button class="fbtn" data-f="all">TODOS</button>
     <button class="fbtn" data-f="casa">🏠 CASA</button>
     <button class="fbtn" data-f="envio">✈️ ENCARGO</button>
   </div>
@@ -552,7 +552,7 @@ const ACC_LIMIT_PROD=29, ACC_LIMIT_EUR=2000;
 const ACC_STATES={activo:{label:'ACTIVO',emoji:'🟢',order:0},completado:{label:'COMPLETADO',emoji:'🚫',order:1},recamara:{label:'EN RECÁMARA',emoji:'🆕',order:2},enmano:{label:'EN MANO',emoji:'🤝',order:3},baneado:{label:'BANEADOS',emoji:'❌',order:4},otros:{label:'OTROS',emoji:'⚠️',order:5}};
 const ADMIN_PIN='LUDO';
 let perfumes=[], cart={}, editingId=null, pendingPhoto=null, pickedGender='', pickedAvail='casa', pickedCond='regular';
-let adminMode=false, activeFilter='all', selectedFirm=null;
+let adminMode=false, activeFilter='firmas', selectedFirm=null;
 const fmt=n=>n.toLocaleString('es-ES',{minimumFractionDigits:2,maximumFractionDigits:2})+'€';
 function waOpen(text){window.open('https://wa.me/?text='+encodeURIComponent(text),'_blank');}
 const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,6);
@@ -4059,6 +4059,11 @@ document.getElementById('checkoutBtn').onclick=()=>{
   render();
   renderCart();
   cartOverlay.classList.remove('on');
+  // El nombre queda guardado solo en ESTE navegador/dispositivo (no en un servidor
+  // compartido), así que se limpia tras cada pedido para que el siguiente cliente
+  // que use el mismo móvil no vea el nombre del anterior ya puesto.
+  buyerAliasInput.value='';
+  try{localStorage.removeItem('buyer_alias_v1');}catch(e){}
   alert('Pedido enviado');
 };
 
