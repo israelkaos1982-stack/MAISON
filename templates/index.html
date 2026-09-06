@@ -32,6 +32,12 @@
   .fbtn.sel[data-f="all"]{background:rgba(201,162,75,.2);border-color:var(--gold);color:var(--gold-soft)}
   .fbtn.sel[data-f="casa"]{background:rgba(224,138,74,.2);border-color:#e08a4a;color:#f6c9a0}
   .fbtn.sel[data-f="envio"]{background:rgba(90,169,230,.2);border-color:#5aa9e6;color:#b6e0fb}
+  .condinfo-btn{width:100%;background:none;border:none;color:var(--muted);font-family:'Jost';font-size:11px;letter-spacing:.02em;padding:9px 2px 2px;cursor:pointer;text-align:center;text-decoration:underline;text-underline-offset:2px}
+  .condinfo-btn:hover{color:var(--gold-soft)}
+  .condinfo-item{margin-bottom:14px}
+  .condinfo-item:last-child{margin-bottom:0}
+  .condinfo-item b{color:var(--gold-soft);font-family:'Cormorant Garamond',serif;font-size:17px}
+  .condinfo-item p{margin:4px 0 0;color:var(--cream);font-size:14px;line-height:1.5}
   .delivery{width:100%;text-align:center;font-family:'Cormorant Garamond',serif;font-size:19px;font-weight:600;letter-spacing:.04em;color:var(--gold-soft);min-height:0;transition:.2s}
   .delivery:not(:empty){padding:12px 0 4px}
   .firmindex{width:100%;display:flex;flex-wrap:wrap;gap:6px;padding:4px 0 2px}
@@ -202,6 +208,7 @@
     <button class="fbtn" data-f="casa">🏠 CASA</button>
     <button class="fbtn" data-f="envio">✈️ ENCARGO</button>
   </div>
+  <button class="condinfo-btn" id="condInfoBtn" type="button">ℹ️ ¿Qué significa Regular / Tester / Sin Caja?</button>
   <div class="delivery" id="delivery"></div>
   <div class="adminbar" id="adminBar">
     <button class="btn" id="addBtn" style="background:#2f5e8a;border-color:#2f5e8a;color:#fff">+ Añadir</button>
@@ -215,6 +222,18 @@
     <button class="btn btn-danger" id="exitAdmin" title="Salir de admin">Salir</button>
     <input type="file" id="importFile" accept="application/json,.json" hidden>
     <input type="file" id="excelFile" accept=".xlsx,.xls" hidden>
+  </div>
+</div>
+
+<div class="overlay" id="condInfoOverlay">
+  <div class="modal">
+    <h2 style="margin-bottom:16px">Estado del perfume</h2>
+    <div class="condinfo-item"><b>● Regular</b><p>Es el producto final. Viene con su caja de diseño oficial y, en la gran mayoría de casos, sellado con plástico (blíster).</p></div>
+    <div class="condinfo-item"><b>● Tester</b><p>La botella y el perfume son exactamente los mismos. La diferencia es que la caja suele ser blanca o marrón y el precio es más bajo.</p></div>
+    <div class="condinfo-item"><b>● Sin Caja</b><p>Es el frasco suelto.</p></div>
+    <div class="modal-actions">
+      <button class="btn btn-fill" id="condInfoClose">Entendido</button>
+    </div>
   </div>
 </div>
 
@@ -4614,6 +4633,11 @@ load();render();renderCart();
 const toTopBtn=document.getElementById('toTopBtn');
 window.addEventListener('scroll',()=>{toTopBtn.classList.toggle('show',window.scrollY>320);},{passive:true});
 toTopBtn.onclick=()=>window.scrollTo({top:0,behavior:'smooth'});
+
+const condInfoOverlay=document.getElementById('condInfoOverlay');
+document.getElementById('condInfoBtn').onclick=()=>condInfoOverlay.classList.add('on');
+document.getElementById('condInfoClose').onclick=()=>condInfoOverlay.classList.remove('on');
+condInfoOverlay.onclick=e=>{if(e.target===condInfoOverlay)condInfoOverlay.classList.remove('on');};
 </script>
 </body>
 </html>
