@@ -4047,6 +4047,19 @@ document.getElementById('checkoutBtn').onclick=()=>{
   });
   txt+=`Total: ${fmt(total)}`;
   waOpen(txt);
+  // Los productos de ✈️ Encargo NUNCA se descuentan del stock (cada semana llega un
+  // Excel nuevo con el listado completo que lo sobreescribe todo). Los de 🏠 Casa SÍ
+  // se descuentan, tanto si compra un invitado como el propio admin.
+  ids.forEach(id=>{
+    const p=perfumes.find(x=>x.id===id);if(!p)return;
+    if(p.avail==='casa')p.stock=Math.max(0,(p.stock||0)-cart[id]);
+  });
+  cart={};
+  save();
+  render();
+  renderCart();
+  cartOverlay.classList.remove('on');
+  alert('Pedido enviado');
 };
 
 document.getElementById('exportBtn').onclick=()=>{const blob=new Blob([JSON.stringify({perfumes},null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='israngel-datos.json';a.click();toast('Datos exportados');};
