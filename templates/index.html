@@ -3802,6 +3802,20 @@ function load(){
     perfumes.forEach(p=>{if(p.avail==='casa'&&!(p.price>0)){p.price=45;added=true;}});
     localStorage.setItem('israngel_casa_price_v1','1');
   }
+  // MIGRACIÓN: corrige el estado Regular/Tester/Sin Caja de los de ✈️ encargo ya guardados
+  // (no reemplaza el array, solo actualiza el campo "cond" buscando el mismo perfume en el
+  // listado nuevo por marca+nombre+talla+stock+precio, así no se pierden fotos ni ediciones)
+  if(localStorage.getItem('israngel_encargo_cond_v1')!=='1'){
+    const condKey=p=>[p.brand,p.name,p.size,p.stock,p.price].join('|').toLowerCase();
+    const condMap={};
+    seedData().filter(p=>p.avail==='envio').forEach(p=>{condMap[condKey(p)]=p.cond;});
+    perfumes.forEach(p=>{
+      if(p.avail!=='envio')return;
+      const nc=condMap[condKey(p)];
+      if(nc&&nc!==p.cond){p.cond=nc;added=true;}
+    });
+    localStorage.setItem('israngel_encargo_cond_v1','1');
+  }
   if(added)save();
 }
 function save(){try{localStorage.setItem(STORE,JSON.stringify({perfumes}));}catch(e){toast('No se pudo guardar (memoria llena)');}}
