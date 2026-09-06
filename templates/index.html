@@ -554,6 +554,7 @@ const ADMIN_PIN='LUDO';
 let perfumes=[], cart={}, editingId=null, pendingPhoto=null, pickedGender='', pickedAvail='casa', pickedCond='regular';
 let adminMode=false, activeFilter='all', selectedFirm=null;
 const fmt=n=>n.toLocaleString('es-ES',{minimumFractionDigits:2,maximumFractionDigits:2})+'€';
+function waOpen(text){window.open('https://wa.me/?text='+encodeURIComponent(text),'_blank');}
 const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,6);
 const GICON={hombre:'♂️',mujer:'♀️',unisex:'👥️'};
 const CLABEL={regular:'Regular',tester:'Tester',sincaja:'Sin Caja'};
@@ -4037,15 +4038,15 @@ document.getElementById('cartItems').onclick=e=>{const inc=e.target.closest('[da
 document.getElementById('checkoutBtn').onclick=()=>{
   const ids=Object.keys(cart);if(!ids.length){toast('Tu cesta está vacía');return;}
   const alias=(buyerAliasInput.value||'').trim();
-  let txt='Hola! Quiero pedir de MAISON:%0A%0A'+(alias?`Cliente: ${alias.toUpperCase()}%0A%0A`:''),total=0;
+  let txt='Hola! Quiero pedir de MAISON:\n\n'+(alias?`Cliente: ${alias.toUpperCase()}\n\n`:''),total=0;
   ids.forEach(id=>{
     const p=perfumes.find(x=>x.id===id);if(!p)return;
     const est=CLABEL[p.cond||'regular'];
-    txt+=`• ${p.brand} ${p.name} (${p.size} · ${est}) x${cart[id]} — ${fmt(p.price*cart[id])}%0A%0A`;
+    txt+=`• ${p.brand} ${p.name} (${p.size} · ${est}) x${cart[id]} — ${fmt(p.price*cart[id])}\n\n`;
     total+=p.price*cart[id];
   });
   txt+=`Total: ${fmt(total)}`;
-  window.open('https://wa.me/?text='+txt,'_blank');
+  waOpen(txt);
 };
 
 document.getElementById('exportBtn').onclick=()=>{const blob=new Blob([JSON.stringify({perfumes},null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='israngel-datos.json';a.click();toast('Datos exportados');};
@@ -4211,14 +4212,14 @@ document.getElementById('salesList').onclick=e=>{
     const s=sales[parseInt(w.dataset.wasale)];if(!s)return;
     const d=new Date(s.date).toLocaleDateString('es-ES',{day:'2-digit',month:'2-digit',year:'2-digit'});
     const acc=s.accountName||(accounts.find(a=>a.id===s.accountId)||{}).name||'—';
-    let t='🧾 *Venta MAISON*%0A%0A';
-    t+='✨ '+s.brand+' '+s.name+(s.size?' · '+s.size:'')+'%0A';
-    t+='💰 Venta '+fmt(s.price)+'%0A';
-    t+='💸 Costo '+fmt(s.cost||0)+'%0A';
-    t+='🏷️ '+acc+'%0A';
-    if(s.buyer)t+='👤 '+s.buyer+'%0A';
+    let t='🧾 *Venta MAISON*\n\n';
+    t+='✨ '+s.brand+' '+s.name+(s.size?' · '+s.size:'')+'\n';
+    t+='💰 Venta '+fmt(s.price)+'\n';
+    t+='💸 Costo '+fmt(s.cost||0)+'\n';
+    t+='🏷️ '+acc+'\n';
+    if(s.buyer)t+='👤 '+s.buyer+'\n';
     t+='📅 '+d;
-    window.open('https://wa.me/?text='+t,'_blank');
+    waOpen(t);
     return;
   }
   const d=e.target.closest('[data-delsale]');if(!d)return;
@@ -4235,18 +4236,18 @@ document.getElementById('shareSales').onclick=()=>{
   const totalVenta=sales.reduce((a,s)=>a+s.price,0);
   const totalCosto=sales.reduce((a,s)=>a+(s.cost||0),0);
   const totalBenef=sales.reduce((a,s)=>a+s.benefit,0);
-  let t='🧾 *VENTAS MAISON*%0A%0A';
+  let t='🧾 *VENTAS MAISON*\n\n';
   sales.forEach(s=>{
     const acc=s.accountName||(accounts.find(a=>a.id===s.accountId)||{}).name||'—';
     t+='✨ '+s.brand+' '+s.name+' » Venta '+fmt(s.price)+' · Costo '+fmt(s.cost||0);
-    t+=' ('+acc+(s.buyer?' · '+s.buyer:'')+')%0A';
+    t+=' ('+acc+(s.buyer?' · '+s.buyer:'')+')\n';
   });
-  t+='%0A━━━━━━━━%0A';
-  t+='📦 '+sales.length+' ventas%0A';
-  t+='💰 Facturado: '+fmt(totalVenta)+'%0A';
-  t+='💸 Costo total: '+fmt(totalCosto)+'%0A';
+  t+='\n━━━━━━━━\n';
+  t+='📦 '+sales.length+' ventas\n';
+  t+='💰 Facturado: '+fmt(totalVenta)+'\n';
+  t+='💸 Costo total: '+fmt(totalCosto)+'\n';
   t+='📈 Beneficio: '+fmt(totalBenef);
-  window.open('https://wa.me/?text='+t,'_blank');
+  waOpen(t);
 };
 [sellOverlay,salesOverlay].forEach(o=>o.onclick=e=>{if(e.target===o)o.classList.remove('on');});
 
@@ -4375,31 +4376,31 @@ function fillStateSelect(){
 document.getElementById('vintedBtn').onclick=()=>{renderVinted();document.getElementById('vintedOverlay').classList.add('on');};
 document.getElementById('closeVinted').onclick=()=>document.getElementById('vintedOverlay').classList.remove('on');
 document.getElementById('shareVintedBtn').onclick=()=>{
-  let t='📱 *GLOBAL*%0A%0A';
+  let t='📱 *GLOBAL*\n\n';
   const byState={};
   Object.keys(ACC_STATES).forEach(k=>byState[k]=[]);
   accounts.forEach(a=>{byState[a.state]?byState[a.state].push(a):byState.otros.push(a);});
   Object.keys(ACC_STATES).sort((a,b)=>ACC_STATES[a].order-ACC_STATES[b].order).forEach(stKey=>{
     const list=byState[stKey];if(!list.length)return;
     const meta=ACC_STATES[stKey];
-    t+='━━━━━━━━%0A';
-    t+='*'+meta.emoji+' '+meta.label+'*%0A%0A';
+    t+='━━━━━━━━\n';
+    t+='*'+meta.emoji+' '+meta.label+'*\n\n';
     list.forEach(a=>{
       const st=accStats(a.id);
-      t+=(a.emoji||'📱')+' '+a.name+'%0A';
-      t+='》 '+fmt(st.eur)+' · '+st.count+' productos%0A';
-      if(!a.noLimit) t+='   Disponible: '+fmt(st.avail)+(st.withdrawn>0?' · Sacado: '+fmt(st.withdrawn):'')+'%0A';
-      else if(st.withdrawn>0) t+='   Disponible: '+fmt(st.avail)+' · Sacado: '+fmt(st.withdrawn)+'%0A';
-      if(a.note)t+='   📝 '+a.note+'%0A';
-      if(a.issues)t+='   ⚠️ '+a.issues+'%0A';
-      t+='%0A';
+      t+=(a.emoji||'📱')+' '+a.name+'\n';
+      t+='》 '+fmt(st.eur)+' · '+st.count+' productos\n';
+      if(!a.noLimit) t+='   Disponible: '+fmt(st.avail)+(st.withdrawn>0?' · Sacado: '+fmt(st.withdrawn):'')+'\n';
+      else if(st.withdrawn>0) t+='   Disponible: '+fmt(st.avail)+' · Sacado: '+fmt(st.withdrawn)+'\n';
+      if(a.note)t+='   📝 '+a.note+'\n';
+      if(a.issues)t+='   ⚠️ '+a.issues+'\n';
+      t+='\n';
     });
   });
   if(transfers.length){
-    t+='━━━━━━━━%0A*💸 TRANSFERENCIAS*%0A%0A';
-    transfers.forEach(tr=>{t+=fmt(tr.amount)+' 》 '+tr.to+(tr.note?' ('+tr.note+')':'')+'%0A';});
+    t+='━━━━━━━━\n*💸 TRANSFERENCIAS*\n\n';
+    transfers.forEach(tr=>{t+=fmt(tr.amount)+' 》 '+tr.to+(tr.note?' ('+tr.note+')':'')+'\n';});
   }
-  window.open('https://wa.me/?text='+t,'_blank');
+  waOpen(t);
 };
 document.getElementById('dedupBtn').onclick=()=>{
   // Normaliza nombre: quita "vinted", orden de palabras, para detectar duplicados
