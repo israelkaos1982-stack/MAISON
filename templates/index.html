@@ -98,6 +98,10 @@
   .overlay.on{display:flex}
   .modal{background:var(--ink);border:1px solid var(--gold);border-radius:4px;width:100%;max-width:440px;padding:24px 22px 26px;overflow-x:hidden}
   .modal h2{font-family:'Cormorant Garamond',serif;font-size:27px;font-weight:600;color:var(--gold-soft);margin-bottom:16px}
+  .cart-head{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:16px}
+  .buyer-alias{width:112px;background:var(--noir);border:1px solid var(--line);border-radius:3px;color:var(--gold-soft);font-family:'Jost';font-size:12px;letter-spacing:.03em;text-transform:uppercase;padding:7px 9px;text-align:right}
+  .buyer-alias::placeholder{color:var(--muted);text-transform:none}
+  .buyer-alias:focus{outline:none;border-color:var(--gold)}
   .field{margin-bottom:13px}
   .field label{display:block;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
   .field input[type=text],.field input[type=number],.field input[type=url]{width:100%;background:var(--noir);border:1px solid var(--line);color:var(--cream);padding:11px 13px;border-radius:2px;font-family:'Jost';font-size:14px;font-weight:300}
@@ -323,7 +327,10 @@
 <!-- CART MODAL -->
 <div class="overlay" id="cartOverlay">
   <div class="modal">
-    <h2>Tu cesta</h2>
+    <div class="cart-head">
+      <h2 style="margin-bottom:0">Tu cesta</h2>
+      <input id="buyerAlias" class="buyer-alias" type="text" maxlength="24" placeholder="Tu nombre">
+    </div>
     <div id="cartItems"></div>
     <div class="rbottom" style="margin-top:16px">
       <span class="rmeta" style="font-size:14px">Total</span>
@@ -4023,10 +4030,14 @@ document.getElementById('addBtn').onclick=()=>openForm(null);
 document.getElementById('wrap').onclick=e=>{const add=e.target.closest('[data-add]'),ed=e.target.closest('[data-edit]');if(add){cart[add.dataset.add]=(cart[add.dataset.add]||0)+1;render();renderCart();toast('Añadido a la cesta');}else if(ed&&adminMode){openForm(ed.dataset.edit);}};
 document.getElementById('cartBtn').onclick=()=>{renderCart();cartOverlay.classList.add('on');};
 document.getElementById('closeCart').onclick=()=>cartOverlay.classList.remove('on');
+const buyerAliasInput=document.getElementById('buyerAlias');
+try{buyerAliasInput.value=localStorage.getItem('buyer_alias_v1')||'';}catch(e){}
+buyerAliasInput.oninput=()=>{try{localStorage.setItem('buyer_alias_v1',buyerAliasInput.value);}catch(e){}};
 document.getElementById('cartItems').onclick=e=>{const inc=e.target.closest('[data-inc]'),dec=e.target.closest('[data-dec]');if(inc){cart[inc.dataset.inc]++;}if(dec){const id=dec.dataset.dec;cart[id]--;if(cart[id]<=0)delete cart[id];}render();renderCart();};
 document.getElementById('checkoutBtn').onclick=()=>{
   const ids=Object.keys(cart);if(!ids.length){toast('Tu cesta está vacía');return;}
-  let txt='Hola! Quiero pedir de MAISON:%0A%0A',total=0;
+  const alias=(buyerAliasInput.value||'').trim();
+  let txt='Hola! Quiero pedir de MAISON:%0A%0A'+(alias?`Cliente: ${alias.toUpperCase()}%0A%0A`:''),total=0;
   ids.forEach(id=>{
     const p=perfumes.find(x=>x.id===id);if(!p)return;
     const est=CLABEL[p.cond||'regular'];
