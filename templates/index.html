@@ -615,7 +615,7 @@ function newHomePerfumes(){
     {brand:'Hugo Boss',name:'Ma Vie pour Femme L’Eau EDT',size:'50 ml',stock:1,gender:'mujer',price:0,avail:'casa'},
     {brand:'Hugo Boss',name:'The Scent Elixir for Her Parfum Intense',size:'50 ml',stock:1,gender:'mujer',price:0,avail:'casa'},
     {brand:'Hugo Boss',name:'The Scent for Her EDP',size:'50 ml',stock:1,gender:'mujer',price:0,avail:'casa'},
-    {brand:'Hugo Boss',name:'The Scent Le Parfum for Her',size:'50 ml',stock:1,gender:'mujer',price:0,avail:'casa'},
+    {brand:'Hugo Boss',name:'The Scent Parfum for Her',size:'50 ml',stock:1,gender:'mujer',price:0,avail:'casa'},
     {brand:'Hugo Boss',name:'The Scent for Him EDT',size:'50 ml',stock:1,gender:'hombre',price:0,avail:'casa'},
     {brand:'Hugo Boss',name:'The Scent Magnetic for Her EDP',size:'50 ml',stock:1,gender:'mujer',price:0,avail:'casa'},
     {brand:'Hugo Boss',name:'The Scent Magnetic for Him EDP',size:'100 ml',stock:1,gender:'hombre',price:0,avail:'casa'},
@@ -3059,11 +3059,24 @@ function load(){
     localStorage.setItem('israngel_encargo_v4','1');
     save();
   }
-  // Inyectar nuevos perfumes de casa que falten (por marca+nombre)
-  const have=perfumes.map(p=>(p.brand+'|'+p.name).toLowerCase());
   let added=false;
+  // MIGRACIÓN: corrige el nombre "The Scent Le Parfum for Her" (typo de una sesión
+  // anterior, el producto real no lleva "Le") — SIEMPRE antes de inyectar, para que
+  // la comprobación de "ya existe" de abajo reconozca la fila ya renombrada y no
+  // cree una fila duplicada con el nombre nuevo.
+  if(localStorage.getItem('israngel_casa_update_v2')!=='1'){
+    perfumes.forEach(p=>{
+      if(p.avail==='casa'&&p.brand==='Hugo Boss'&&p.name==='The Scent Le Parfum for Her'){p.name='The Scent Parfum for Her';added=true;}
+    });
+    localStorage.setItem('israngel_casa_update_v2','1');
+  }
+  // Inyectar nuevos perfumes de casa que falten (por marca+nombre+talla, para no
+  // confundir 2 tallas del mismo producto —p.ej. Bottled Parfum 50ml/100ml— como si
+  // fueran el mismo y saltarse la inyección de una de ellas)
+  const have=perfumes.map(p=>(p.brand+'|'+p.name+'|'+p.size).toLowerCase());
   newHomePerfumes().forEach(np=>{
-    if(!have.includes((np.brand+'|'+np.name).toLowerCase())){perfumes.push({id:uid(),photo:null,home:true,...np});added=true;}
+    const key=(np.brand+'|'+np.name+'|'+np.size).toLowerCase();
+    if(!have.includes(key)){perfumes.push({id:uid(),photo:null,home:true,...np});have.push(key);added=true;}
   });
   // MIGRACIÓN: precio por defecto 45€ para los de 🏠 casa que aún no tengan precio (una sola vez)
   if(localStorage.getItem('israngel_casa_price_v1')!=='1'){
