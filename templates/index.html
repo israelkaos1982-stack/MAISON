@@ -3369,6 +3369,23 @@ function loadAccounts(){
   let migrated=false;
   accounts.forEach(a=>{if(/en mano/i.test(a.name)&&a.state==='otros'){a.state='enmano';migrated=true;}});
   if(migrated)saveAccounts();
+  // MIGRACIÓN: cifras reales de septiembre en el panel GLOBAL (una sola vez)
+  if(localStorage.getItem('israngel_accounts_update_v1')!=='1'){
+    let updated=false;
+    const byName=n=>accounts.find(a=>a.name===n);
+    let a=byName('Tomás Vinted (Berserker1982)');
+    if(a){a.baseProd=18;a.baseEur=828;a.withdrawn=754;updated=true;}
+    a=byName('Álvaro (Bharat82)');
+    if(a){a.baseEur=0;updated=true;}
+    a=byName('En Mano (Isra)');
+    if(a){a.baseProd=10;a.baseEur=393;updated=true;}
+    a=byName('En Mano (Ángel)');
+    if(a){a.baseProd=0;a.baseEur=0;updated=true;}
+    a=byName('Deudas');
+    if(a){a.baseEur=286;a.note='ISRA debe 286€ a Angel Aeropuerto';updated=true;}
+    localStorage.setItem('israngel_accounts_update_v1','1');
+    if(updated)saveAccounts();
+  }
 }
 function saveAccounts(){try{localStorage.setItem(ACC_STORE,JSON.stringify(accounts));}catch(e){toast('No se pudo guardar la cuenta');}}
 function accStats(accId){
