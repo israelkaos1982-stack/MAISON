@@ -966,7 +966,7 @@ function seedData(){
     {brand:'Calvin Klein',name:'Woman EDP',size:'100 ML',stock:12,gender:'mujer',price:42,avail:'envio',cond:'sincaja'},
     {brand:'Calvin Klein',name:'Woman EDT',size:'100 ML',stock:2,gender:'mujer',price:38,avail:'envio',cond:'sincaja'},
     {brand:'Calvin Klein',name:'Woman Intense EDP',size:'100 ML',stock:6,gender:'mujer',price:42,avail:'envio',cond:'sincaja'},
-    {brand:'Carolina Herreara',name:'212 Vip Rose Woman Cab Edition EDP',size:'80 ML',stock:1,gender:'mujer',price:54,avail:'envio',cond:'sincaja'},
+    {brand:'Carolina Herrera',name:'212 Vip Rose Woman Cab Edition EDP',size:'80 ML',stock:1,gender:'mujer',price:54,avail:'envio',cond:'sincaja'},
     {brand:'Carolina Herrera',name:'212 Heroes Men EDT',size:'50 ML',stock:8,gender:'hombre',price:54,avail:'envio',cond:'regular'},
     {brand:'Carolina Herrera',name:'212 Heroes Men EDT',size:'90 ML',stock:9,gender:'hombre',price:70,avail:'envio',cond:'regular'},
     {brand:'Carolina Herrera',name:'212 Heroes Men EDT',size:'90 ML',stock:31,gender:'hombre',price:69.5,avail:'envio',cond:'regular'},
@@ -3216,6 +3216,16 @@ function load(){
     const nuevos=seedData().filter(p=>p.avail==='envio');
     perfumes=casa.concat(nuevos);
     localStorage.setItem('israngel_encargo_v5','1');
+    save();
+  }
+  // MIGRACIÓN v6: corrige el typo "Carolina Herreara" del Excel (una sola vez) —
+  // reemplaza TODO el listado de envío otra vez para que el dispositivo que ya
+  // cargó el v5 con el typo reciba el nombre correcto. Conserva SOLO lo de 🏠 casa.
+  if(localStorage.getItem('israngel_encargo_v6')!=='1'){
+    const casa=perfumes.filter(p=>p.avail!=='envio');
+    const nuevos=seedData().filter(p=>p.avail==='envio');
+    perfumes=casa.concat(nuevos);
+    localStorage.setItem('israngel_encargo_v6','1');
     save();
   }
   let added=false;
